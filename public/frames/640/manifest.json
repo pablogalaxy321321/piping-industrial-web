@@ -1,0 +1,7 @@
+{
+  "pattern": "frame_%04d.webp",
+  "count": 187,
+  "fps": 24,
+  "width": 640,
+  "quality": 80
+}
