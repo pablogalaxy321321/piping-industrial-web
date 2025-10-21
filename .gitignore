@@ -22,3 +22,15 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Environment & credentials
+.env
+.env.*
+!.env.example
+.npmrc
+.yarnrc*
+.pnp.*
+
+# Project-specific: do not commit internal instructions or source videos
+.github/instructions/**
+public/videos/**
