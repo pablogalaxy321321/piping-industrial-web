@@ -29,7 +29,7 @@ export default function App() {
       <header
         id="main-header"
         ref={headerRef}
-        className={`fixed top-0 left-0 w-full z-50 p-4 md:px-8 transition-all duration-300 bg-black/30 backdrop-blur-md ${
+        className={`fixed top-0 left-0 w-full z-50 p-4 md:px-8 transition-all duration-300 ${
           scrolled ? "scrolled" : ""
         }`}
       >

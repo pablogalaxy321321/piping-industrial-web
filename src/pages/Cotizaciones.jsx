@@ -3,9 +3,9 @@ import Cotizaciones3D from "./Cotizaciones3D.jsx";
 
 export default function Cotizaciones() {
   const [params, setParams] = useState({
-    di: 0.3, // diámetro interior (m)
-    de: 0.6, // diámetro exterior (m)
-    espesor: 0.06, // espesor (m)
+    di: 300, // diámetro interior (mm)
+    de: 600, // diámetro exterior (mm)
+    espesor: 60, // espesor (mm)
     pernos: 12,
     material: "inox",
     unidades: 10,
@@ -34,51 +34,53 @@ export default function Cotizaciones() {
           <div className="space-y-4 flex-1">
             <div>
               <label className="block text-sm text-gray-300">
-                Diámetro interior (m)
+                Diámetro interior (mm)
               </label>
               <input
                 type="range"
-                min="0.1"
-                max="0.8"
-                step="0.01"
+                min="100"
+                max="800"
+                step="10"
                 value={params.di}
                 onChange={(e) => update("di", parseFloat(e.target.value))}
                 className="w-full"
               />
               <div className="text-xs text-gray-500 mt-1">
-                {params.di.toFixed(2)} m
+                {params.di.toFixed(0)} mm
               </div>
             </div>
             <div>
               <label className="block text-sm text-gray-300">
-                Diámetro exterior (m)
+                Diámetro exterior (mm)
               </label>
               <input
                 type="range"
-                min="0.2"
-                max="1.2"
-                step="0.01"
+                min="200"
+                max="1200"
+                step="10"
                 value={params.de}
                 onChange={(e) => update("de", parseFloat(e.target.value))}
                 className="w-full"
               />
               <div className="text-xs text-gray-500 mt-1">
-                {params.de.toFixed(2)} m
+                {params.de.toFixed(0)} mm
               </div>
             </div>
             <div>
-              <label className="block text-sm text-gray-300">Espesor (m)</label>
+              <label className="block text-sm text-gray-300">
+                Espesor (mm)
+              </label>
               <input
                 type="range"
-                min="0.02"
-                max="0.2"
-                step="0.005"
+                min="20"
+                max="200"
+                step="5"
                 value={params.espesor}
                 onChange={(e) => update("espesor", parseFloat(e.target.value))}
                 className="w-full"
               />
               <div className="text-xs text-gray-500 mt-1">
-                {params.espesor.toFixed(3)} m
+                {params.espesor.toFixed(0)} mm
               </div>
             </div>
             <div>

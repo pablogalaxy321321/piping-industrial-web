@@ -32,4 +32,5 @@ El diseño está fuertemente inspirado en `terminal-industries.com`.
 * **IA:** El objetivo final es conectar el configurador a un asistente de IA (probablemente Vapi) para generar cotizaciones. El código debe ser modular y fácil de mantener.'
 ---
 
-Provide project context and coding guidelines that AI should follow when generating code, answering questions, or reviewing changes.
+IMPORTANTE: No hagas build ni ejecutes el servidor de desarrollo a noser que lo necesites para probar cambios. Solo edita los archivos según las instrucciones.
+Tampoco subas los cambios a GitHub.

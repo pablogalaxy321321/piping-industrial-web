@@ -21,9 +21,10 @@ export default function Cotizaciones3D({ params }) {
     const group = flangeGroupRef.current;
     group.clear();
     const { di, de, espesor, pernos, material } = params;
-    const outerR = de / 2;
-    const innerR = di / 2;
-    const thickness = espesor;
+    // Convertir de milímetros a metros para la visualización 3D
+    const outerR = de / 1000 / 2;
+    const innerR = di / 1000 / 2;
+    const thickness = espesor / 1000;
 
     const color =
       material === "inox"
