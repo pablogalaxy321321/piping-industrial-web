@@ -176,8 +176,8 @@ export default function Home() {
   return (
     <main>
       {/* Hero Section with Scroll-driven Image Sequence */}
-  <section id="hero-video-section" className="relative h-[300vh] -mt-20">
-  <div className="sticky top-20 h-screen w-full flex items-center justify-center overflow-hidden">
+      <section id="hero-video-section" className="relative h-[300vh] -mt-20">
+  <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden">
           <canvas
             id="hero-canvas"
             ref={canvasRef}
