@@ -58,7 +58,7 @@ body::before {
 }
 
 header.scrolled {
-  background-color: rgba(5, 5, 5, 0.8);
+  background-color: rgba(5, 5, 5, 0.6);
   -webkit-backdrop-filter: blur(10px);
   backdrop-filter: blur(10px);
   border-bottom: 0;
