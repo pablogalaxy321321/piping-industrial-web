@@ -98,3 +98,34 @@ header.scrolled {
 .mobile-nav.open {
   transform: translateX(0);
 }
+
+/* Animaciones para el carrusel de flanges */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%) rotate(45deg);
+  }
+  100% {
+    transform: translateX(300%) rotate(45deg);
+  }
+}
+
+.carousel-slide {
+  transition: all 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+/* Efectos de profundidad 3D */
+.carousel-slide img {
+  transition: all 0.7s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform, filter;
+}
+
+/* Estilos para el parallax scroll */
+.parallax-element {
+  will-change: transform;
+}
+
+/* Efecto glow mejorado para títulos del carrusel */
+.carousel-slide .text-glow {
+  text-shadow: 0 0 5px rgba(6, 182, 212, 0.8), 0 0 10px rgba(6, 182, 212, 0.6),
+    0 0 15px rgba(6, 182, 212, 0.4), 0 0 20px rgba(6, 182, 212, 0.2);
+}

@@ -6,6 +6,7 @@ import {
   loadManifest,
   pickBestSet,
 } from "../lib/useImageSequence";
+import FlangesCarousel from "../components/FlangesCarousel";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -155,7 +156,7 @@ export default function Home() {
       link.rel = "preload";
       link.as = "image";
       link.href = href;
-      link.crossOrigin = "anonymous";
+      // Removido crossOrigin para que coincida con el modo de carga de las imágenes
       head.appendChild(link);
       links.push(link);
     }
@@ -197,6 +198,27 @@ export default function Home() {
         id="main-content"
         className="container mx-auto px-4 md:px-8 relative z-30 bg-black"
       >
+        {/* Carrusel Avanzado de Flanges */}
+        <section
+          id="flanges-carousel"
+          className="py-20 md:py-32 overflow-hidden"
+        >
+          <div className="text-center mb-16">
+            <h2 className="text-sm font-bold uppercase text-cyan-400 tracking-widest">
+              Nuestros Productos
+            </h2>
+            <p className="text-4xl md:text-5xl font-black mt-2 text-white">
+              Flanges de Precisión 3D
+            </p>
+            <p className="mt-6 text-gray-400 text-lg max-w-2xl mx-auto">
+              Tecnología de vanguardia aplicada a la fabricación de flanges
+              industriales con estándares internacionales de calidad.
+            </p>
+          </div>
+
+          <FlangesCarousel />
+        </section>
+
         <section id="servicios" className="py-20 md:py-32">
           <div className="text-center mb-16">
             <h2 className="text-sm font-bold uppercase text-cyan-400 tracking-widest">
