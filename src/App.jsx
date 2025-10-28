@@ -34,8 +34,12 @@ export default function App() {
         }`}
       >
         <nav className="container mx-auto flex justify-between items-center">
-          <Link to="/" className="text-2xl font-black text-white">
-            LOGO EMPRESA
+          <Link to="/" className="flex items-center">
+            <img
+              src="/imagenes/BridaMark_Logo.png"
+              alt="BridaMark Logo"
+              className="h-7 md:h-8 w-auto"
+            />
           </Link>
           <div className="hidden md:flex space-x-8 items-center">
             <a

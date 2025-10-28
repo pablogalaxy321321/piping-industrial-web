@@ -135,15 +135,6 @@ export default function Home() {
       },
     });
 
-    gsap.to(".hero-text-container h1, .hero-text-container p", {
-      opacity: 1,
-      y: 0,
-      stagger: 0.2,
-      duration: 1,
-      ease: "power3.out",
-      scrollTrigger: { trigger: "#hero-video-section", start: "top center" },
-    });
-
     rafId = requestAnimationFrame(draw);
 
     return () => {
@@ -178,7 +169,7 @@ export default function Home() {
       {/* Hero Section with Scroll-driven Image Sequence */}
       <section
         id="hero-video-section"
-        className="relative h-[300vh] -mt-16 md:-mt-20"
+        className="relative h-[200vh] -mt-16 md:-mt-20"
       >
         <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden">
           <canvas
@@ -198,21 +189,13 @@ export default function Home() {
           <div
             className="hero-text-container absolute z-20 text-center text-white p-4"
             style={{ willChange: "opacity, transform" }}
-          >
-            <h1 className="text-4xl md:text-7xl font-black text-glow">
-              INGENIERÍA DE PRECISIÓN
-            </h1>
-            <p className="mt-4 max-w-2xl text-lg md:text-xl text-gray-300">
-              Soluciones de piping industrial para los desafíos más complejos de
-              la minería en Chile.
-            </p>
-          </div>
+          ></div>
         </div>
       </section>
 
       <div
         id="main-content"
-        className="container mx-auto px-4 md:px-8 relative z-20"
+        className="container mx-auto px-4 md:px-8 relative z-30 bg-black"
       >
         <section id="servicios" className="py-20 md:py-32">
           <div className="text-center mb-16">

@@ -28,11 +28,49 @@ export default function Cotizaciones3D({ params }) {
     const { di, de, espesor, material, flangeType } = params;
     // pernos se usa en las funciones de creación individuales
 
+    // Validar parámetros de entrada
+    if (
+      !di ||
+      !de ||
+      !espesor ||
+      isNaN(di) ||
+      isNaN(de) ||
+      isNaN(espesor) ||
+      di <= 0 ||
+      de <= 0 ||
+      espesor <= 0
+    ) {
+      console.warn("Parámetros inválidos para buildFlange:", {
+        di,
+        de,
+        espesor,
+      });
+      return;
+    }
+
     // Convertir de milímetros a metros para la visualización 3D, con escalado mejorado
     const scale = 0.005; // Factor de escala para mejor visualización
     const outerR = (de * scale) / 2;
     const innerR = (di * scale) / 2;
     const thickness = espesor * scale;
+
+    // Validar valores calculados
+    if (
+      isNaN(outerR) ||
+      isNaN(innerR) ||
+      isNaN(thickness) ||
+      outerR <= 0 ||
+      innerR < 0 ||
+      thickness <= 0 ||
+      innerR >= outerR
+    ) {
+      console.warn("Valores calculados inválidos:", {
+        outerR,
+        innerR,
+        thickness,
+      });
+      return;
+    }
 
     // Determinar propiedades del material basado en ASTM - REALISTA
     let color, metalness, roughness, envMapIntensity, clearcoat;
@@ -214,9 +252,26 @@ export default function Cotizaciones3D({ params }) {
     // Cuello cónico para soldadura - CORREGIDO
     if (innerR > 0.01) {
       const neckHeight = thickness * 1.5; // Altura reducida
-      const neckGeom = new THREE.ConeGeometry(
-        innerR * 1.02, // Radio superior más ajustado
-        innerR * 1.2, // Radio inferior reducido
+      const neckRadius = innerR * 1.1; // Radio del cuello
+
+      // Validar que los valores no sean NaN o negativos
+      if (
+        isNaN(neckRadius) ||
+        isNaN(neckHeight) ||
+        neckRadius <= 0 ||
+        neckHeight <= 0
+      ) {
+        console.warn("Valores inválidos para ConeGeometry:", {
+          neckRadius,
+          neckHeight,
+        });
+        return;
+      }
+
+      // Usar CylinderGeometry en lugar de ConeGeometry para mejor control
+      const neckGeom = new THREE.CylinderGeometry(
+        innerR * 1.05, // Radio superior
+        neckRadius, // Radio inferior
         neckHeight,
         32
       );
@@ -229,21 +284,27 @@ export default function Cotizaciones3D({ params }) {
 
   // Función para crear brida deslizante (Slip-On)
   const createSlipOnFlange = (group, outerR, innerR, thickness, mat) => {
-    // Cuerpo principal: anillo con agujeros reales (Extrude + holes)
+    // Basado en la imagen de referencia: cuerpo principal + cuello cilíndrico integrado
+
+    const hubHeight = thickness * 0.8; // Altura del cuello
+    const hubOuterRadius = innerR * 1.25; // Radio exterior del cuello (un poco más grueso que el agujero)
+
+    // 1. CUERPO PRINCIPAL (disco principal del flange)
     const flangeShape = new THREE.Shape();
     flangeShape.absarc(0, 0, outerR, 0, Math.PI * 2, false);
 
+    // Agujero central
     if (innerR > 0.01) {
       const bore = new THREE.Path();
       bore.absarc(0, 0, innerR, 0, Math.PI * 2, true);
       flangeShape.holes.push(bore);
     }
 
-    // Agujeros de pernos (circulares reales)
+    // Agujeros de pernos
     const { pernos } = params;
     if (pernos > 0) {
       const boltHoleRadius = Math.max(outerR * 0.025, 0.006);
-      const boltCircleRadius = innerR + (outerR - innerR) * 0.65; // un poco más hacia adentro
+      const boltCircleRadius = innerR + (outerR - innerR) * 0.65;
       for (let i = 0; i < pernos; i++) {
         const angle = (i / pernos) * Math.PI * 2;
         const x = Math.cos(angle) * boltCircleRadius;
@@ -266,7 +327,79 @@ export default function Cotizaciones3D({ params }) {
     body.castShadow = body.receiveShadow = true;
     group.add(body);
 
-    // Raised Face (RF) opcional
+    // 2. CUELLO SLIP-ON (cilindro que se extiende hacia atrás)
+    if (innerR > 0.01) {
+      // Crear el cuello como un cilindro hueco
+      const neckGeom = new THREE.CylinderGeometry(
+        hubOuterRadius, // Radio superior
+        hubOuterRadius, // Radio inferior (mismo = cilindro)
+        hubHeight, // Altura
+        48 // Segmentos
+      );
+
+      // Crear el agujero interior del cuello
+      const neckHoleGeom = new THREE.CylinderGeometry(
+        innerR, // Radio del agujero
+        innerR, // Radio del agujero
+        hubHeight + 0.01, // Ligeramente más alto para evitar z-fighting
+        48
+      );
+
+      // Cuello exterior
+      const neck = new THREE.Mesh(neckGeom, mat);
+      neck.position.y = -hubHeight / 2; // Posicionado para extenderse hacia abajo desde y=0
+      neck.castShadow = neck.receiveShadow = true;
+      group.add(neck);
+
+      // Agujero del cuello (material transparente)
+      const neckHole = new THREE.Mesh(
+        neckHoleGeom,
+        new THREE.MeshBasicMaterial({
+          transparent: true,
+          opacity: 0,
+          side: THREE.DoubleSide,
+        })
+      );
+      neckHole.position.y = -hubHeight / 2;
+      group.add(neckHole);
+
+      // 3. ANILLO DE TRANSICIÓN (para conexión visual suave entre cuerpo y cuello)
+      const transitionHeight = thickness * 0.15;
+      const transitionOuterR = (hubOuterRadius + outerR) * 0.6; // Radio intermedio
+
+      const transitionGeom = new THREE.CylinderGeometry(
+        transitionOuterR, // Radio superior (más amplio)
+        hubOuterRadius, // Radio inferior (igual al cuello)
+        transitionHeight, // Altura de transición
+        32
+      );
+
+      // Agujero de la transición
+      const transitionHoleGeom = new THREE.CylinderGeometry(
+        innerR,
+        innerR,
+        transitionHeight + 0.01,
+        32
+      );
+
+      const transition = new THREE.Mesh(transitionGeom, mat);
+      transition.position.y = -transitionHeight / 2; // En la interfaz entre cuerpo y cuello
+      transition.castShadow = transition.receiveShadow = true;
+      group.add(transition);
+
+      const transitionHole = new THREE.Mesh(
+        transitionHoleGeom,
+        new THREE.MeshBasicMaterial({
+          transparent: true,
+          opacity: 0,
+          side: THREE.DoubleSide,
+        })
+      );
+      transitionHole.position.y = -transitionHeight / 2;
+      group.add(transitionHole);
+    }
+
+    // 4. RAISED FACE (si está configurado)
     const faceType = (params.faceType || "").toLowerCase();
     const wantsRF = faceType.includes("rf") || faceType.includes("raised");
     if (wantsRF && innerR > 0.01) {
@@ -288,41 +421,31 @@ export default function Cotizaciones3D({ params }) {
       });
       const rfMesh = new THREE.Mesh(rfGeom, mat);
       rfMesh.rotation.x = -Math.PI / 2;
-      // El cuerpo ahora apoya en y=0, su cara superior queda en y=thickness
-      rfMesh.position.y = thickness + rfHeight / 2 + 1e-5; // evitar z-fighting
+      rfMesh.position.y = thickness + rfHeight / 2 + 1e-5;
       rfMesh.castShadow = rfMesh.receiveShadow = true;
       group.add(rfMesh);
     }
-
-    // Cuello Slip-On (corto y proporcionado)
-    if (innerR > 0.01) {
-      const hubHeight = Math.max(thickness * 0.25, outerR * 0.03); // más corto
-      const hubRadius = innerR + 1e-4; // al ras con el bore para evitar gap visual
-      const hub = new THREE.Mesh(
-        new THREE.CylinderGeometry(hubRadius, hubRadius, hubHeight, 48),
-        mat
-      );
-      // Debe partir desde la cara inferior (y=0) hacia abajo (sin holgura)
-      hub.position.y = -hubHeight / 2;
-      hub.castShadow = hub.receiveShadow = true;
-      group.add(hub);
-    }
   };
 
-  // Función para crear brida roscada (Threaded) - SIMPLIFICADA
+  // Función para crear brida roscada (Threaded)
   const createThreadedFlange = (group, outerR, innerR, thickness, mat) => {
-    // Cuerpo principal de la brida con agujero interior y perforaciones para pernos
+    // Basado en la imagen de referencia: cuerpo plano + cuello elevado con roscas internas
+
+    const hubHeight = thickness * 0.7; // Altura del cuello elevado
+    const hubOuterRadius = innerR * 1.3; // Radio exterior del cuello
+
+    // 1. CUERPO PRINCIPAL (disco plano con agujero central)
     const flangeShape = new THREE.Shape();
     flangeShape.absarc(0, 0, outerR, 0, Math.PI * 2, false);
 
-    // Crear agujero interior si es significativo
+    // Crear agujero central del tamaño del cuello elevado
     if (innerR > 0.01) {
-      const holeShape = new THREE.Path();
-      holeShape.absarc(0, 0, innerR, 0, Math.PI * 2, true);
-      flangeShape.holes.push(holeShape);
+      const bore = new THREE.Path();
+      bore.absarc(0, 0, hubOuterRadius, 0, Math.PI * 2, true);
+      flangeShape.holes.push(bore);
     }
 
-    // Agregar perforaciones para pernos
+    // Agujeros de pernos
     const { pernos } = params;
     if (pernos > 0) {
       const boltHoleRadius = Math.max(outerR * 0.025, 0.006);
@@ -332,49 +455,130 @@ export default function Cotizaciones3D({ params }) {
         const angle = (i / pernos) * Math.PI * 2;
         const x = Math.cos(angle) * boltCircleRadius;
         const z = Math.sin(angle) * boltCircleRadius;
-
-        const boltHole = new THREE.Path();
-        boltHole.absarc(x, z, boltHoleRadius, 0, Math.PI * 2, true);
-        flangeShape.holes.push(boltHole);
+        const hole = new THREE.Path();
+        hole.absarc(x, z, boltHoleRadius, 0, Math.PI * 2, true);
+        flangeShape.holes.push(hole);
       }
     }
 
-    const extrudeSettings = {
+    const flangeGeom = new THREE.ExtrudeGeometry(flangeShape, {
       depth: thickness,
       bevelEnabled: false,
-    };
-
-    const flangeGeom = new THREE.ExtrudeGeometry(flangeShape, extrudeSettings);
+      steps: 1,
+      curveSegments: 64,
+    });
     const body = new THREE.Mesh(flangeGeom, mat);
     body.rotation.x = -Math.PI / 2;
     body.position.y = thickness / 2;
     body.castShadow = body.receiveShadow = true;
     group.add(body);
 
-    // Crear roscas simples y limpias en el agujero interior
+    // 2. CUELLO ELEVADO CON ROSCAS (anillo hueco usando Shape con hole)
     if (innerR > 0.01) {
-      const threadDepth = innerR * 0.03; // Profundidad reducida para evitar problemas
-      const numThreads = 6; // Número fijo para consistencia
+      // Crear el cuello como un anillo (Shape con agujero)
+      const hubShape = new THREE.Shape();
+      hubShape.absarc(0, 0, hubOuterRadius, 0, Math.PI * 2, false);
+
+      // Agujero interior del cuello
+      const hubHole = new THREE.Path();
+      hubHole.absarc(0, 0, innerR, 0, Math.PI * 2, true);
+      hubShape.holes.push(hubHole);
+
+      const hubGeom = new THREE.ExtrudeGeometry(hubShape, {
+        depth: hubHeight,
+        bevelEnabled: false,
+        steps: 1,
+        curveSegments: 48,
+      });
+
+      const hub = new THREE.Mesh(hubGeom, mat);
+      hub.rotation.x = -Math.PI / 2;
+      hub.position.y = thickness + hubHeight / 2;
+      hub.castShadow = hub.receiveShadow = true;
+      group.add(hub);
+
+      // 3. ROSCAS INTERNAS (anillos dentro del cuello)
+      const numThreads = 7;
+      const threadHeight = hubHeight / (numThreads + 1);
+      const threadOuterRadius = innerR * 1.08;
+      const threadInnerRadius = innerR * 0.95;
 
       for (let i = 0; i < numThreads; i++) {
-        // Crear anillos simples para representar roscas
-        const threadGeometry = new THREE.TorusGeometry(
-          innerR + threadDepth, // Radio mayor
-          threadDepth * 0.5, // Radio menor del anillo
-          8, // Segmentos radiales
-          16 // Segmentos tubulares
-        );
+        // Crear anillo de rosca usando Shape con hole
+        const threadShape = new THREE.Shape();
+        threadShape.absarc(0, 0, threadOuterRadius, 0, Math.PI * 2, false);
 
-        const thread = new THREE.Mesh(threadGeometry, mat);
+        const threadHole = new THREE.Path();
+        threadHole.absarc(0, 0, threadInnerRadius, 0, Math.PI * 2, true);
+        threadShape.holes.push(threadHole);
+
+        const threadGeom = new THREE.ExtrudeGeometry(threadShape, {
+          depth: threadHeight * 0.4, // Grosor de cada rosca
+          bevelEnabled: false,
+          steps: 1,
+          curveSegments: 32,
+        });
+
+        const thread = new THREE.Mesh(threadGeom, mat);
+        thread.rotation.x = -Math.PI / 2;
         thread.position.y =
-          -thickness / 2 + (i + 0.5) * (thickness / numThreads);
-        thread.rotation.x = Math.PI / 2;
-
+          thickness + (i + 1) * threadHeight + threadHeight * 0.2;
         thread.castShadow = thread.receiveShadow = true;
         group.add(thread);
       }
+
+      // 4. BISEL/CHAFLÁN en la parte superior (transición suave)
+      const bevelHeight = hubHeight * 0.2;
+
+      const bevelShape = new THREE.Shape();
+      bevelShape.absarc(0, 0, hubOuterRadius * 0.95, 0, Math.PI * 2, false);
+
+      const bevelHole = new THREE.Path();
+      bevelHole.absarc(0, 0, innerR, 0, Math.PI * 2, true);
+      bevelShape.holes.push(bevelHole);
+
+      const bevelGeom = new THREE.ExtrudeGeometry(bevelShape, {
+        depth: bevelHeight,
+        bevelEnabled: false,
+        steps: 1,
+        curveSegments: 32,
+      });
+
+      const bevel = new THREE.Mesh(bevelGeom, mat);
+      bevel.rotation.x = -Math.PI / 2;
+      bevel.position.y = thickness + hubHeight + bevelHeight / 2;
+      bevel.castShadow = bevel.receiveShadow = true;
+      group.add(bevel);
+    }
+
+    // 5. RAISED FACE (si está configurado)
+    const faceType = (params.faceType || "").toLowerCase();
+    const wantsRF = faceType.includes("rf") || faceType.includes("raised");
+    if (wantsRF && innerR > 0.01) {
+      const rfWidth = Math.min((outerR - innerR) * 0.15, outerR * 0.08);
+      const rfOuterR = hubOuterRadius + rfWidth;
+      const rfHeight = Math.max(thickness * 0.05, outerR * 0.006);
+
+      const rfShape = new THREE.Shape();
+      rfShape.absarc(0, 0, rfOuterR, 0, Math.PI * 2, false);
+      const rfHole = new THREE.Path();
+      rfHole.absarc(0, 0, hubOuterRadius, 0, Math.PI * 2, true);
+      rfShape.holes.push(rfHole);
+
+      const rfGeom = new THREE.ExtrudeGeometry(rfShape, {
+        depth: rfHeight,
+        bevelEnabled: false,
+        steps: 1,
+        curveSegments: 64,
+      });
+      const rfMesh = new THREE.Mesh(rfGeom, mat);
+      rfMesh.rotation.x = -Math.PI / 2;
+      rfMesh.position.y = thickness + rfHeight / 2;
+      rfMesh.castShadow = rfMesh.receiveShadow = true;
+      group.add(rfMesh);
     }
   };
+
   useEffect(() => {
     const mount = mountRef.current;
     const scene = new THREE.Scene();
@@ -560,7 +764,7 @@ export default function Cotizaciones3D({ params }) {
     renderer.domElement.addEventListener("mousedown", onDown);
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
-    renderer.domElement.addEventListener("wheel", onWheel);
+    renderer.domElement.addEventListener("wheel", onWheel, { passive: false });
 
     let raf;
     const clock = new THREE.Clock();
@@ -569,9 +773,10 @@ export default function Cotizaciones3D({ params }) {
       const deltaTime = clock.getDelta();
 
       // Efectos de animación premium sutiles
-      if (flangeGroup.children.length > 0) {
+      const currentFlangeGroup = flangeGroupRef.current;
+      if (currentFlangeGroup && currentFlangeGroup.children.length > 0) {
         // Rotación muy suave para mostrar reflecciones dinámicas
-        flangeGroup.rotation.y += deltaTime * 0.02;
+        currentFlangeGroup.rotation.y += deltaTime * 0.02;
       }
 
       // Render con postproceso
