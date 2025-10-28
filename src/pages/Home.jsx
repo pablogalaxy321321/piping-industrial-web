@@ -75,6 +75,7 @@ export default function Home() {
 
     let rafId = 0;
     let currentIndex = 0;
+    let shouldClearCanvas = false;
 
     const draw = () => {
       const list = images.current;
@@ -87,7 +88,11 @@ export default function Home() {
         canvas.style.width = `${window.innerWidth}px`;
         canvas.style.height = `${window.innerHeight}px`;
       }
-      if (img && w > 0 && h > 0) {
+
+      // Clear canvas if we're at the end
+      if (shouldClearCanvas) {
+        ctx.clearRect(0, 0, w, h);
+      } else if (img && w > 0 && h > 0) {
         ctx.clearRect(0, 0, w, h);
         const iw = img.naturalWidth,
           ih = img.naturalHeight;
@@ -126,9 +131,13 @@ export default function Home() {
           Math.max(0, Math.round(self.progress * (total - 1)))
         );
         currentIndex = target;
+
+        // Clear canvas when reaching 90% progress
+        shouldClearCanvas = self.progress > 0.9;
+
         const glow = Math.min(1, Math.max(0, self.progress * 1.1));
         gsap.to("#hero-glow", {
-          opacity: glow * 0.4,
+          opacity: shouldClearCanvas ? 0 : glow * 0.4,
           overwrite: true,
           duration: 0.1,
           ease: "none",
@@ -170,7 +179,7 @@ export default function Home() {
       {/* Hero Section with Scroll-driven Image Sequence */}
       <section
         id="hero-video-section"
-        className="relative h-[200vh] -mt-16 md:-mt-20"
+        className="relative h-[150vh] -mt-16 md:-mt-20"
       >
         <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden">
           <canvas
@@ -196,7 +205,7 @@ export default function Home() {
 
       <div
         id="main-content"
-        className="container mx-auto px-4 md:px-8 relative z-30 bg-black"
+        className="container mx-auto px-4 md:px-8 relative z-30 bg-black pt-20 -mt-32"
       >
         {/* Carrusel Avanzado de Flanges */}
         <section
@@ -283,11 +292,14 @@ export default function Home() {
               </a>
             </div>
             <div>
-              <img
-                src="https://placehold.co/600x400/000000/1F2937?text=Proyecto+Minero+1"
-                alt="Imagen de un proyecto de piping en una faena minera"
-                className="rounded-xl shadow-2xl"
-              />
+              {/* Imagen temporal removida - placeholder */}
+              <div className="rounded-xl shadow-2xl bg-gray-800 h-64 flex items-center justify-center">
+                <p className="text-gray-400 text-center">
+                  Imagen del proyecto
+                  <br />
+                  <span className="text-sm">Próximamente</span>
+                </p>
+              </div>
             </div>
           </div>
         </section>
