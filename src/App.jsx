@@ -43,6 +43,12 @@ export default function App() {
           </Link>
           <div className="hidden md:flex space-x-8 items-center">
             <a
+              href="/#flanges-carousel"
+              className="text-gray-300 hover:text-cyan-400 transition-colors"
+            >
+              Productos
+            </a>
+            <a
               href="/#servicios"
               className="text-gray-300 hover:text-cyan-400 transition-colors"
             >
@@ -92,6 +98,13 @@ export default function App() {
       </header>
 
       <div id="mobile-nav" className={mobileNavClasses}>
+        <a
+          href="/#flanges-carousel"
+          className="text-gray-300 text-2xl py-4 hover:text-cyan-400 transition-colors"
+          onClick={() => setMobileOpen(false)}
+        >
+          Productos
+        </a>
         <a
           href="/#servicios"
           className="text-gray-300 text-2xl py-4 hover:text-cyan-400 transition-colors"
