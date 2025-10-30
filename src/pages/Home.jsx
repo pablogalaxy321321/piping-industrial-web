@@ -175,13 +175,13 @@ export default function Home() {
   }, [basePath, framesCount]);
 
   return (
-    <main>
+    <main className="bg-white">
       {/* Hero Section with Scroll-driven Image Sequence */}
       <section
         id="hero-video-section"
-        className="relative h-[150vh] -mt-16 md:-mt-20"
+        className="relative h-[150vh] -mt-16 md:-mt-20 bg-white"
       >
-        <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden">
+        <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden bg-white">
           <canvas
             id="hero-canvas"
             ref={canvasRef}
@@ -203,32 +203,30 @@ export default function Home() {
         </div>
       </section>
 
-      <div
-        id="main-content"
-        className="container mx-auto px-4 md:px-8 relative z-30 bg-black pt-20 -mt-32"
+      {/* Carrusel Avanzado de Flanges - Full Width */}
+      <section
+        id="flanges-carousel"
+        className="py-20 md:py-32 overflow-hidden bg-black relative z-30 -mt-96"
       >
-        {/* Carrusel Avanzado de Flanges */}
-        <section
-          id="flanges-carousel"
-          className="py-20 md:py-32 overflow-hidden"
-        >
-          <div className="text-center mb-16">
-            <h2 className="text-sm font-bold uppercase text-cyan-400 tracking-widest">
-              Nuestros Productos
-            </h2>
-            <p className="text-4xl md:text-5xl font-black mt-2 text-white">
-              Flanges de Precisión 3D
-            </p>
-            <p className="mt-6 text-gray-400 text-lg max-w-2xl mx-auto">
-              Tecnología de vanguardia aplicada a la fabricación de flanges
-              industriales con estándares internacionales de calidad.
-            </p>
-          </div>
+        <div className="text-center mb-16">
+          <h2 className="text-sm font-bold uppercase text-cyan-400 tracking-widest">
+            Nuestros Productos
+          </h2>
+          <p className="text-4xl md:text-5xl font-black mt-2 text-white">
+            Flanges de Precisión 3D
+          </p>
+          <p className="mt-6 text-gray-400 text-lg max-w-2xl mx-auto">
+            Tecnología de vanguardia aplicada a la fabricación de flanges
+            industriales con estándares internacionales de calidad.
+          </p>
+        </div>
 
-          <FlangesCarousel />
-        </section>
+        <FlangesCarousel />
+      </section>
 
-        <section id="servicios" className="py-20 md:py-32">
+      {/* Servicios - Full Width */}
+      <section id="servicios" className="py-20 md:py-32 bg-black">
+        <div className="container mx-auto px-4 md:px-8">
           <div className="text-center mb-16">
             <h2 className="text-sm font-bold uppercase text-cyan-400 tracking-widest">
               Nuestra Expertise
@@ -267,9 +265,12 @@ export default function Home() {
               </p>
             </div>
           </div>
-        </section>
+        </div>
+      </section>
 
-        <section id="proyectos" className="py-20 md:py-32">
+      {/* Proyectos - Full Width */}
+      <section id="proyectos" className="py-20 md:py-32 bg-black">
+        <div className="container mx-auto px-4 md:px-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-16 items-center">
             <div>
               <h2 className="text-sm font-bold uppercase text-cyan-400 tracking-widest">
@@ -302,8 +303,8 @@ export default function Home() {
               </div>
             </div>
           </div>
-        </section>
-      </div>
+        </div>
+      </section>
     </main>
   );
 }
