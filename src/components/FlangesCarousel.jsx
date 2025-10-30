@@ -40,6 +40,7 @@ const flangesData = [
       "Certificación AS9100",
       "50.000+ Ciclos de Vida Rotacional",
     ],
+    pdfUrl: "/PDFs/Ficha_Tecnica_J.R.O.pdf",
   },
   {
     id: 5,
@@ -332,12 +333,19 @@ export default function FlangesCarousel() {
 
                 {/* Botón de acción */}
                 <button
+                  onClick={() => {
+                    if (flange.pdfUrl) {
+                      window.open(flange.pdfUrl, "_blank");
+                    }
+                  }}
                   className="mt-6 px-8 py-3 bg-gradient-to-r from-cyan-500 to-blue-600 
                                  text-black font-bold rounded-lg hover:from-cyan-400 hover:to-blue-500 
                                  transition-all duration-300 hover:scale-105 hover:shadow-lg 
                                  hover:shadow-cyan-500/25 transform-gpu"
                 >
-                  Ver Detalles Técnicos
+                  {flange.pdfUrl
+                    ? "Descargar Ficha Técnica"
+                    : "Ver Detalles Técnicos"}
                 </button>
               </div>
             </div>
