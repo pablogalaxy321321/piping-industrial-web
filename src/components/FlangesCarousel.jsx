@@ -32,10 +32,14 @@ const flangesData = [
   {
     id: 4,
     image: "/imagenes/flanges/BridaMark_flange2.png",
-    title: "Flange de Alta Presión",
+    title: "Junta Rotativa Orbital (J.R.O.)",
     description:
-      "Diseño especializado para condiciones extremas en la industria minera chilena.",
-    specs: ["ASME B16.47", "Acero Forjado", "600-900 PSI"],
+      "Diseño especializado para Movimiento de Alta Precisión en entornos de Vacío Extremo y variación térmica en satélites de telecomunicaciones.",
+    specs: [
+      "Aleación de Titanio Grado 5 (Ti-6Al-4V)",
+      "Certificación AS9100",
+      "50.000+ Ciclos de Vida Rotacional",
+    ],
   },
   {
     id: 5,
