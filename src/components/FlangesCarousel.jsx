@@ -29,10 +29,15 @@ const flangesData = [
   {
     id: 3,
     image: "/imagenes/flanges/BridaMark_flange1.png",
-    title: "Flange Industrial Estándar",
+    title: "Brida de Ultra Alto Vacío (UHV)",
     description:
-      "Fabricación de precisión para aplicaciones industriales con certificaciones internacionales.",
-    specs: ["ISO 7005", "Aleación Especial", "Alta Temperatura"],
+      "Sistema de Acoplamiento Segmentado diseñado para lograr y mantener Ultra Alto Vacío (UHV). Mínima desgasificación para entornos de plasma y reactores de fusión.",
+    specs: [
+      "Material Inconel 625",
+      "Desgasificación < 10^{-10} Torr",
+      "Ciclo de Horneado 300°C",
+    ],
+    pdfUrl: "/PDFs/Ficha_Tecnica_U.H.V.pdf",
   },
   {
     id: 4,
