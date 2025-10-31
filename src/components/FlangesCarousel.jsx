@@ -16,10 +16,15 @@ const flangesData = [
   {
     id: 2,
     image: "/imagenes/flanges/BridaMark_Flange_virtual2.png",
-    title: "Flange Virtual 300#",
+    title: "Módulo de Agarre Robótico (MAR)",
     description:
-      "Solución optimizada para sistemas de piping complejos con máxima resistencia y durabilidad.",
-    specs: ["ANSI B16.5", "Acero Inoxidable", "300-600 PSI"],
+      "Actuador de sujeción para Manipulación de Componentes Críticos. Diseñado para Robótica Industrial de Alta Carga en ensamblaje de motores, turbinas y estructuras pesadas.",
+    specs: [
+      "Acero de Alta Aleación C700",
+      "Fuerza de Agarre 150 kN",
+      "Ciclos de Vida: 1M+",
+    ],
+    pdfUrl: "/PDFs/Ficha_Tecnica_M.A.R.pdf",
   },
   {
     id: 3,
