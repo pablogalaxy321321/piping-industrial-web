@@ -32,6 +32,7 @@ const flangesData = [
   {
     id: 4,
     image: "/imagenes/flanges/BridaMark_flange2.png",
+    video: "/videos/jro_web.webm",
     title: "Junta Rotativa Orbital (J.R.O.)",
     description:
       "Diseño especializado para Movimiento de Alta Precisión en entornos de Vacío Extremo y variación térmica en satélites de telecomunicaciones.",
@@ -270,23 +271,46 @@ export default function FlangesCarousel() {
                   className="relative group cursor-pointer"
                   style={{ transformStyle: "preserve-3d" }}
                 >
-                  <img
-                    src={flange.image}
-                    alt={flange.title}
-                    className="w-full max-w-md h-auto object-contain transition-all duration-700 
-                             group-hover:scale-110 group-hover:rotate-2 
-                             drop-shadow-2xl filter brightness-110 contrast-110"
-                    style={{
-                      filter:
-                        index === currentSlide
-                          ? "drop-shadow(0 25px 50px rgba(6, 182, 212, 0.4)) brightness(1.2)"
-                          : "drop-shadow(0 10px 30px rgba(0,0,0,0.5))",
-                      transform:
-                        index === currentSlide
-                          ? "translateZ(50px)"
-                          : "translateZ(0px)",
-                    }}
-                  />
+                  {flange.video ? (
+                    <video
+                      src={flange.video}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
+                      className="w-full max-w-md h-auto object-contain transition-all duration-700 
+                               group-hover:scale-110 group-hover:rotate-2 
+                               drop-shadow-2xl filter brightness-110 contrast-110"
+                      style={{
+                        filter:
+                          index === currentSlide
+                            ? "drop-shadow(0 25px 50px rgba(6, 182, 212, 0.4)) brightness(1.2)"
+                            : "drop-shadow(0 10px 30px rgba(0,0,0,0.5))",
+                        transform:
+                          index === currentSlide
+                            ? "translateZ(50px)"
+                            : "translateZ(0px)",
+                      }}
+                    />
+                  ) : (
+                    <img
+                      src={flange.image}
+                      alt={flange.title}
+                      className="w-full max-w-md h-auto object-contain transition-all duration-700 
+                               group-hover:scale-110 group-hover:rotate-2 
+                               drop-shadow-2xl filter brightness-110 contrast-110"
+                      style={{
+                        filter:
+                          index === currentSlide
+                            ? "drop-shadow(0 25px 50px rgba(6, 182, 212, 0.4)) brightness(1.2)"
+                            : "drop-shadow(0 10px 30px rgba(0,0,0,0.5))",
+                        transform:
+                          index === currentSlide
+                            ? "translateZ(50px)"
+                            : "translateZ(0px)",
+                      }}
+                    />
+                  )}
 
                   {/* Efecto de brillo holográfico */}
                   <div
