@@ -1,212 +1,38 @@
-import { useEffect, useRef, useState } from "react";
-import { gsap } from "gsap";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
-import {
-  useImageSequence,
-  loadManifest,
-  pickBestSet,
-} from "../lib/useImageSequence";
 import FlangesCarousel from "../components/FlangesCarousel";
 
-gsap.registerPlugin(ScrollTrigger);
-
 export default function Home() {
-  const canvasRef = useRef(null);
-  const [setWidth, setSetWidth] = useState(() =>
-    pickBestSet(window.innerWidth, window.devicePixelRatio || 1)
-  );
-  const [framesCount, setFramesCount] = useState(0);
-  const [basePath, setBasePath] = useState(() => `/frames/${setWidth}`);
-  const dpr = Math.min(2, window.devicePixelRatio || 1);
-  const { images } = useImageSequence({
-    basePath,
-    count: framesCount || 1,
-    preload: 60,
-  });
-
-  // Cargar manifest del set actual
-  useEffect(() => {
-    let active = true;
-    loadManifest(basePath)
-      .then((m) => {
-        if (active) setFramesCount(m.count || 0);
-      })
-      .catch(() => {});
-    return () => {
-      active = false;
-    };
-  }, [basePath]);
-
-  // Elegir mejor set en resize
-  useEffect(() => {
-    const onResize = () => {
-      const best = pickBestSet(window.innerWidth, window.devicePixelRatio || 1);
-      setSetWidth((prev) => (prev !== best ? best : prev));
-    };
-    window.addEventListener("resize", onResize);
-    return () => window.removeEventListener("resize", onResize);
-  }, []);
-
-  // Actualizar basePath al cambiar setWidth
-  useEffect(() => {
-    setBasePath(`/frames/${setWidth}`);
-  }, [setWidth]);
-
-  // Resize canvas to viewport
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const setCanvasSize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-    };
-    setCanvasSize();
-    window.addEventListener("resize", setCanvasSize);
-    return () => window.removeEventListener("resize", setCanvasSize);
-  }, []);
-
-  // GSAP scroll-driven image sequence and text intro
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = "high";
-
-    let rafId = 0;
-    let currentIndex = 0;
-    let shouldClearCanvas = false;
-
-    const draw = () => {
-      const list = images.current;
-      const img = list[currentIndex];
-      const w = Math.floor(window.innerWidth * dpr);
-      const h = Math.floor(window.innerHeight * dpr);
-      if (canvas.width !== w || canvas.height !== h) {
-        canvas.width = w;
-        canvas.height = h;
-        canvas.style.width = `${window.innerWidth}px`;
-        canvas.style.height = `${window.innerHeight}px`;
-      }
-
-      // Clear canvas if we're at the end
-      if (shouldClearCanvas) {
-        ctx.clearRect(0, 0, w, h);
-      } else if (img && w > 0 && h > 0) {
-        ctx.clearRect(0, 0, w, h);
-        const iw = img.naturalWidth,
-          ih = img.naturalHeight;
-        const cr = w / h;
-        const ir = iw / ih;
-        let dw,
-          dh,
-          dx = 0,
-          dy = 0;
-        if (ir > cr) {
-          dh = h;
-          const scale = h / ih;
-          dw = iw * scale;
-          dx = (w - dw) / 2;
-        } else {
-          dw = w;
-          const scale = w / iw;
-          dh = ih * scale;
-          dy = (h - dh) / 2;
-        }
-        ctx.drawImage(img, dx, dy, dw, dh);
-      }
-      rafId = requestAnimationFrame(draw);
-    };
-
-    const st = ScrollTrigger.create({
-      trigger: "#hero-video-section",
-      start: "top top",
-      end: "bottom bottom",
-      scrub: true,
-      pin: true,
-      onUpdate: (self) => {
-        const total = Math.max(1, framesCount);
-        const target = Math.min(
-          total - 1,
-          Math.max(0, Math.round(self.progress * (total - 1)))
-        );
-        currentIndex = target;
-
-        // Clear canvas when reaching 90% progress
-        shouldClearCanvas = self.progress > 0.9;
-
-        const glow = Math.min(1, Math.max(0, self.progress * 1.1));
-        gsap.to("#hero-glow", {
-          opacity: shouldClearCanvas ? 0 : glow * 0.4,
-          overwrite: true,
-          duration: 0.1,
-          ease: "none",
-        });
-      },
-    });
-
-    rafId = requestAnimationFrame(draw);
-
-    return () => {
-      cancelAnimationFrame(rafId);
-      st && st.kill();
-    };
-  }, [images, dpr, framesCount]);
-
-  // Preload explícito de los primeros frames del set seleccionado
-  useEffect(() => {
-    if (!framesCount) return;
-    const head = document.head;
-    const links = [];
-    const max = Math.min(40, framesCount);
-    for (let i = 0; i < max; i++) {
-      const href = `${basePath}/frame_${String(i + 1).padStart(4, "0")}.webp`;
-      const link = document.createElement("link");
-      link.rel = "preload";
-      link.as = "image";
-      link.href = href;
-      // Removido crossOrigin para que coincida con el modo de carga de las imágenes
-      head.appendChild(link);
-      links.push(link);
-    }
-    return () => {
-      links.forEach((l) => head.removeChild(l));
-    };
-  }, [basePath, framesCount]);
-
   return (
-    <main className="bg-white">
-      {/* Hero Section with Scroll-driven Image Sequence */}
+    <main className="bg-black">
+      {/* Hero Section with Video */}
       <section
         id="hero-video-section"
-        className="relative h-[150vh] -mt-16 md:-mt-20 bg-white"
+        className="relative h-screen -mt-16 md:-mt-20"
       >
-        <div className="sticky top-0 h-screen w-full flex items-center justify-center overflow-hidden bg-white">
-          <canvas
-            id="hero-canvas"
-            ref={canvasRef}
-            className="absolute top-0 left-0 h-full w-full"
-          ></canvas>
+        <div className="relative h-screen w-full overflow-hidden">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="absolute top-0 left-0 w-full h-full object-cover"
+            style={{ zIndex: 1 }}
+          >
+            <source src="/videos/revelacion_isotipo.webm" type="video/webm" />
+            Su navegador no soporta el elemento de video.
+          </video>
+          <div className="absolute inset-0 bg-black/20" style={{ zIndex: 2 }} />
           <div
-            id="hero-glow"
-            className="pointer-events-none absolute inset-0 z-10 opacity-0"
-            style={{
-              background:
-                "radial-gradient(60% 40% at 50% 50%, rgba(6, 182, 212, 0.25) 0%, rgba(0,0,0,0) 60%)",
-              mixBlendMode: "screen",
-            }}
-          />
-          <div
-            className="hero-text-container absolute z-20 text-center text-white p-4"
-            style={{ willChange: "opacity, transform" }}
-          ></div>
+            className="hero-text-container absolute z-20 text-center text-white p-4 inset-0 flex items-center justify-center"
+            style={{ zIndex: 3 }}
+          >
+            {/* Aquí puedes agregar texto superpuesto si lo necesitas */}
+          </div>
         </div>
-      </section>
-
+      </section>{" "}
       {/* Carrusel Avanzado de Flanges - Full Width */}
       <section
         id="flanges-carousel"
-        className="py-20 md:py-32 overflow-hidden bg-black relative z-30 -mt-96"
+        className="py-20 md:py-32 overflow-hidden bg-black relative z-30"
       >
         <div className="text-center mb-16">
           <h2 className="text-sm font-bold uppercase text-cyan-400 tracking-widest">
@@ -223,7 +49,6 @@ export default function Home() {
 
         <FlangesCarousel />
       </section>
-
       {/* Servicios - Full Width */}
       <section id="servicios" className="py-20 md:py-32 bg-black">
         <div className="container mx-auto px-4 md:px-8">
@@ -267,7 +92,6 @@ export default function Home() {
           </div>
         </div>
       </section>
-
       {/* Proyectos - Full Width */}
       <section id="proyectos" className="py-20 md:py-32 bg-black">
         <div className="container mx-auto px-4 md:px-8">
